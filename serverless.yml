@@ -1,0 +1,120 @@
+service: book-quote
+
+frameworkVersion: '3'
+
+plugins:
+  - serverless-webpack
+  - serverless-dynamodb-local
+  - serverless-offline
+
+custom:
+  webpack:
+    webpackConfig: ./webpack.config.js
+    includeModules:
+      forceExclude:
+        - aws-sdk
+    packager: 'npm'
+    concurrency: 4
+  serverless-offline:
+    httpPort: 3003
+  dynamodb:
+    start:
+      port: 5000
+      inMemory: true
+      migrate: true
+      seed: true
+    seed:
+      test:
+        sources:
+          - table: ${self:provider.environment.USERS_TABLE}
+            sources: [./test/users.json]
+    stages:
+      - dev
+
+package:
+  individually: true
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  stage: ${opt:stage, 'dev'}
+  region: ${opt:region, 'us-east-1'}
+  apiGateway:
+    apiKeys:
+      - ${self:provider.stage}-bookQuote
+    usagePlan:
+      quota:
+        limit: 1000
+        offset: 0
+        period: DAY
+      throttle:
+        burstLimit: 100
+        rateLimit: 10
+  environment:
+    AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
+    USERS_TABLE: users-${self:provider.stage}
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:*
+          Resource: "arn:aws:dynamodb:${self:provider.region}:*:table/*-${self:provider.stage}"
+
+functions:
+  createUser:
+    handler: src/functions/user/createUser.handler
+    events:
+      - http:
+          method: post
+          path: user
+          cors: true
+          private: true
+  getAllUser:
+    handler: src/functions/user/getAllUser.handler
+    events:
+      - http:
+          method: get
+          path: user
+          cors: true
+          private: true
+  getUser:
+    handler: src/functions/user/getUser.handler
+    events:
+      - http:
+          method: get
+          path: user/{id}
+          cors: true
+          private: true
+  updateUser:
+    handler: src/functions/user/updateUser.handler
+    events:
+      - http:
+          method: put
+          path: user/{id}
+          cors: true
+          private: true
+  deleteUser:
+    handler: src/functions/user/deleteUser.handler
+    events:
+      - http:
+          method: delete
+          path: user/{id}
+          cors: true
+          private: true
+
+resources:
+  Resources:
+    UsuariosTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.USERS_TABLE}
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1

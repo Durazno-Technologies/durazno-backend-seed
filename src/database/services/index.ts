@@ -5,7 +5,7 @@ import UserService from "./userService";
 
 // do not edit, managed by @durazno-technologies/create-dzn package
 const {
-  USERS_TABLE
+  USERS_TABLE,
 } = process.env;
 
 // do not edit, export services

@@ -1,6 +1,6 @@
 const path = require("path");
-const tjs = require("typescript-json-schema");
 const fs = require("fs");
+const tjs = require("typescript-json-schema");
 
 const settings = {
   required: true,
@@ -12,11 +12,10 @@ const compilerOptions = {
 };
 
 const program = tjs.getProgramFromFiles(
-  [
-    path.resolve("src/dtos/UserDto.ts"),
-  ],
+  fs.readdirSync(path.join('src', 'dtos'))
+    .map(file => path.resolve(path.join('src', 'dtos', file))),
   compilerOptions,
-  "./"
+  process.cwd(),
 );
 
 const schema = tjs.generateSchema(program, "*", settings);

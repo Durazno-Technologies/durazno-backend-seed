@@ -3,7 +3,7 @@ createUser:
   events:
     - http:
         method: post
-        path: user
+        path: users
         cors: true
         private: true
 getAllUser:
@@ -11,7 +11,7 @@ getAllUser:
   events:
     - http:
         method: get
-        path: user
+        path: users
         cors: true
         private: true
 getUser:
@@ -19,7 +19,7 @@ getUser:
   events:
     - http:
         method: get
-        path: user/{id}
+        path: users/{id}
         cors: true
         private: true
 updateUser:
@@ -27,7 +27,7 @@ updateUser:
   events:
     - http:
         method: put
-        path: user/{id}
+        path: users/{id}
         cors: true
         private: true
 deleteUser:
@@ -35,6 +35,6 @@ deleteUser:
   events:
     - http:
         method: delete
-        path: user/{id}
+        path: users/{id}
         cors: true
         private: true
